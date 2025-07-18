@@ -1,0 +1,2 @@
+# Smart-Room-Climate-Monitor-using-ESP32-and-DHT11-with-real--time-data-on-mobile-or-web-dashboard
+This project uses an ESP32 microcontroller and a DHT11 sensor to monitor temperature and humidity in real-time. The data is sent over Wi-Fi and displayed on a mobile or web dashboard, allowing users to remotely track room climate conditions. It offers a simple, low-cost IoT solution for smart homes and indoor environment monitoring.

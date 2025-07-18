@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>DHT11 Data Dashboard</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #fef3bd;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: contain;
+            transition: background 0.5s ease-in-out;
+        }
+        .dashboard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px 25px;
+            width: 360px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+        }
+        .dashboard h1 {
+            margin: 0;
+            font-size: 30px;
+            color: #F57C00;
+            font-weight: 700;
+        }
+        .dashboard p.subtitle {
+            margin: 8px 0 0 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #666;
+        }
+        .timestamp {
+            font-family: monospace;
+            text-align: right;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .data-box {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .data {
+            width: 48%;
+            background-color: #fff8e1;
+            border: 2px solid #F9A825;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            color: #FF5722;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .data-label {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .threshold-info {
+            margin-top: 15px;
+            font-size: 13px;
+            font-style: italic;
+            color: #444;
+            text-align: center;
+            background-color: #fff3cd;
+            border: 1.5px solid #ffeeba;
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+        .footer {
+            margin-top: 18px;
+            font-size: 12px;
+            text-align: center;
+            color: #555;
+        }
+        .credits {
+            margin-top: 10px;
+            font-size: 13px;
+            font-style: italic;
+            text-align: center;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>G. Pulla Reddy College</h1>
+        <p class="subtitle">DHT11 Data</p>
+        <div class="timestamp" id="dateTimeDisplay">--</div>
+        <div class="data-box">
+            <div class="data">
+                <div class="data-label">Temperature (°C)</div>
+                <div id="tempValue">25.0</div>
+            </div>
+            <div class="data">
+                <div class="data-label">Humidity (%)</div>
+                <div id="humValue">50.0</div>
+            </div>
+        </div>
+        <div class="threshold-info">
+            temperature ≥ 25 → Hot | temperature &lt; 25 → Cool
+        </div>
+        <div class="footer">
+            Powered by ThingSpeak | Real-time Dashboard
+        </div>
+        <div class="credits">
+            Designed by Mukesh, Vignesh, Charan, Pavan, Chandra, Mahesh
+        </div>
+    </div>
+
+    <script>
+        const tempValue = document.getElementById('tempValue');
+        const humValue = document.getElementById('humValue');
+        const dateTimeDisplay = document.getElementById('dateTimeDisplay');
+
+        async function fetchThingSpeakData() {
+            try {
+                const url = 'https://api.thingspeak.com/channels/2965118/feeds/last.json?api_key=TJAWGGGWS732GCYY';
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to fetch data');
+                const data = await res.json();
+                const temperature = parseFloat(data.field1);
+                const humidity = parseFloat(data.field2);
+                tempValue.textContent = isNaN(temperature) ? '25.0' : temperature.toFixed(1);
+                humValue.textContent = isNaN(humidity) ? '50.0' : humidity.toFixed(1);
+                if (!isNaN(temperature)) {
+                    if (temperature >= 25) {
+                        document.body.style.backgroundImage = "url('summer.png')";
+                        document.body.style.backgroundColor = "#fef3bd";
+                    } else {
+                        document.body.style.backgroundImage = "url('winter.png')";
+                        document.body.style.backgroundColor = "#e3f2fd";
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                tempValue.textContent = '25.0';
+                humValue.textContent = '50.0';
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const dateStr = now.toLocaleDateString(undefined, dateOptions);
+            const timeStr = now.toLocaleTimeString(undefined, timeOptions);
+            dateTimeDisplay.textContent = `${dateStr} | ${timeStr}`;
+        }
+
+        fetchThingSpeakData();
+        setInterval(fetchThingSpeakData, 5000);
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>
